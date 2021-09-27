@@ -1,5 +1,5 @@
-const Router = require('koa-router');
-const postsCtrl = require('./posts.ctrl');
+import Router from 'koa-router';
+import * as postsCtrl from './posts.ctrl';
 
 const posts = new Router();
 
@@ -12,4 +12,4 @@ posts.put('/:id', postsCtrl.replace);
 posts.patch('/:id', postsCtrl.update);
 
 /* -------------------------------- 라우터 내보내기 -------------------------------- */
-module.exports = posts;
+export default posts;
