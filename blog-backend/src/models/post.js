@@ -11,3 +11,13 @@ const PostSchema = new Schema({
     default: Date.now, // 현재 날짜를 기본값으로 지정
   },
 });
+
+/** mongoose.model(name [, schema, collection, skipInit])
+ * @param name : 스키마 이름
+ * @param schema : 스키마 객체
+ * @param collection : 원하는 컬렉션 이름 작성
+ * 데이터베이스는 스키마 이름을 정하면, 그 이름의 복수 형태로 데이터베이스에 컬렉션 이름을 만든다. (스키마 이름 Post -> 컬렉션 이름 posts)
+ */
+const Post = mongoose.model('Post', PostSchema);
+mongoose.model();
+export default Post;
