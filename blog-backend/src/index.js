@@ -2,15 +2,26 @@ require('dotenv').config();
 const Koa = require('koa');
 const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser');
-
-const app = new Koa();
-const router = new Router();
+const api = require('./api');
+const mongoose = require('mongoose');
 
 /* ------------------------------- 환경 변수 파일 참조 ------------------------------ */
 // process.env 내부 값에 대한 레퍼런스
-const { PORT } = process.env;
+const { PORT, MONGO_URI } = process.env;
 
-const api = require('./api');
+/* ------------------------------- mongoose 설정 ------------------------------ */
+// 서버와 데이터베이스 연결
+mongoose
+  .connect(MONGO_URI, { useNewUrlParser: true })
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((e) => {
+    console.error(e);
+  });
+
+const app = new Koa();
+const router = new Router();
 
 /* --------------------------------- 라우터 설정 --------------------------------- */
 // api 라우트 적용
