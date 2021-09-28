@@ -55,8 +55,13 @@ export const write = async (ctx) => {
 /* -------------------------------- 포스트 목록 조회 ------------------------------- */
 // GET /api/posts
 export const list = async (ctx) => {
-  const page = parseInt(ctx.query.page || '1', 10);
-
+  // ctx의 쿼리에서 페이지 참조하기
+  // query는 문자열이므로 숫자로 변환해야한다.
+  const page = parseInt(
+    ctx.query.page || '1' /*값이 주어지지 않았다면 1을 사용*/,
+    10,
+  );
+  //
   if (page < 1) {
     ctx.status = 400;
     return;
@@ -73,7 +78,7 @@ export const list = async (ctx) => {
     const posts = await Post.find()
       .sort({ _id /*정렬할 필드*/: -1 /*내림차순*/ })
       .limit(10) // 보이는 개수 제한
-      .skip((page - 1) * 10)
+      .skip((page - 1) * 10) // 페이지를 10개씩 띄우기
       .exec();
     ctx.body = posts;
   } catch (e) {
