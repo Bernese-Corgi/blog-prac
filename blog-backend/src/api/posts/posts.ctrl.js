@@ -63,7 +63,9 @@ export const list = async (ctx) => {
      * 서버에 쿼리 요청
      * 데이터를 조회할 때 특정 조건을 설정하고, 불러오는 제한 설정 가능
      */
-    const posts = await Post.find().exec();
+    const posts = await Post.find()
+      .sort({ _id /*정렬할 필드*/: -1 /*내림차순*/ })
+      .exec();
     ctx.body = posts;
   } catch (e) {
     ctx.throw(500, e);
