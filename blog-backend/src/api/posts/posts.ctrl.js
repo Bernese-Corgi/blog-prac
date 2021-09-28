@@ -1,4 +1,18 @@
 import Post from '../../models/post';
+import mongoose from 'mongoose';
+
+/* ------------------------------- 요청 검증 미들웨어 ------------------------------- */
+const { ObjectId } = mongoose.Types;
+
+export const checkObjectId = (ctx, next) => {
+  const { id } = ctx.params;
+
+  if (!ObjectId.isValid(id)) {
+    ctx.status = 400; // Bad Request
+    return;
+  }
+  return next();
+};
 
 /* --------------------------------- 포스트 작성 --------------------------------- */
 // POST /api/posts { title, body }
