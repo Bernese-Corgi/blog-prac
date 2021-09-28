@@ -79,8 +79,18 @@ export const list = async (ctx) => {
       .sort({ _id /*정렬할 필드*/: -1 /*내림차순*/ })
       .limit(10) // 보이는 개수 제한
       .skip((page - 1) * 10) // 페이지를 10개씩 띄우기
+      .lean() // 데이터를 JSON 형태로 조회
       .exec();
-    ctx.body = posts;
+
+    // 마지막 페이지 번호
+    const postCount = await Post.countDocuments().exec();
+    ctx.set('Last-page', Math.ceil(postCount / 10));
+
+    ctx.body = posts.map((post) => ({
+      ...post,
+      body:
+        post.body.length < 200 ? post.body : `${post.body.slice(0, 200)}...`,
+    }));
   } catch (e) {
     ctx.throw(500, e);
   }
