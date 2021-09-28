@@ -65,6 +65,7 @@ export const list = async (ctx) => {
      */
     const posts = await Post.find()
       .sort({ _id /*정렬할 필드*/: -1 /*내림차순*/ })
+      .limit(10) // 보이는 개수 제한
       .exec();
     ctx.body = posts;
   } catch (e) {
