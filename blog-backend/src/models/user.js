@@ -29,6 +29,16 @@ UserSchema.methods.checkPassword = async function (password) {
   return result; // true or false
 };
 
+/** serialize()
+ * hashedPassword 필드가 응답되지 않도록 데이터를 JSON으로 변환 후 delete로 해당 필드 삭제
+ * @returns hashedPassword 필드를 삭제한 데이터
+ */
+UserSchema.methods.serialize = function () {
+  const data = this.toJSON();
+  delete data.hashedPassword;
+  return data;
+};
+
 /* --------------------------------- 정적 메서드 --------------------------------- */
 /** findByUsername(username)
  * username으로 데이터를 찾을 수 있다
