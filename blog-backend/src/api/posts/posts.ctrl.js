@@ -1,5 +1,6 @@
 import Post from '../../models/post';
 import mongoose from 'mongoose';
+import Joi from 'joi';
 
 /* ------------------------------- 요청 검증 미들웨어 ------------------------------- */
 const { ObjectId } = mongoose.Types;
@@ -18,6 +19,22 @@ export const checkObjectId = (ctx, next) => {
 // POST /api/posts { title, body }
 // { title: '제목', body: '내용', tags: [ '태그1', '태그2' ] }
 export const write = async (ctx) => {
+  // request body 검증을 위한 스키마
+  const schema = Joi.object().keys({
+    // 객체가 다음 필드를 가지고 있음을 검증
+    title: Joi.string().required(), // required()가 있으면 필수 항목
+    body: Joi.string().required(),
+    tags: Joi.array().items(Joi.string()).required(), // 문자열로 이루어진 배열
+  });
+
+  // 검증하고 나서 실패인 경우 에러 처리
+  const result = schema.validate(ctx.request.body);
+  if (result.error) {
+    ctx.status = 400; // Bad Request
+    ctx.body = result.error;
+    return;
+  }
+
   // REST API의 Request Body는 ctx.request.body에서 조회할 수 있다.
   const { title, body, tags } = ctx.request.body;
 
@@ -121,6 +138,21 @@ export const replace = (ctx) => {
 // PATCH /api/posts/:id { title, body }
 // PATCH 메서드는 주어진 필드만 교체한다
 export const update = async (ctx) => {
+  // request body 검증을 위한 스키마
+  const schema = Joi.object().keys({
+    title: Joi.string(),
+    body: Joi.string(),
+    tags: Joi.array().items(Joi.string()),
+  });
+
+  // 검증 후 검증 실패인 경우 에러 처리
+  const result = schema.validate(ctx.request.body);
+  if (result.error) {
+    ctx.status = 400; // Bad Request
+    ctx.body = result.error;
+    return;
+  }
+
   const { id } = ctx.params;
 
   try {
