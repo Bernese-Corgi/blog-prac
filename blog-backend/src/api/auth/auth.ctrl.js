@@ -48,8 +48,41 @@ export const register = async (ctx) => {
 };
 
 /* 로그인 ---------------------------------- */
+// POST /api/auth/login { username: '', password: '' }
 export const login = async (ctx) => {
-  //
+  const { username, password } = ctx.request.body;
+
+  // username, password가 없으면 에러 처리
+  if (!username || !password) {
+    ctx.status = 401; // Unauthorized
+    return;
+  }
+
+  try {
+    // username으로 계정 찾아서 해당하는 계정 데이터 반환
+    const user = await User.findByUsername(username);
+    // 계정이 존재하지 않으면 에러 처리
+    if (!user) {
+      ctx.status = 401;
+      return;
+    }
+
+    // <- 계정이 유효하면 아래 코드 실행 ->
+
+    // password가 위에서 찾은 user 계정 데이터와 일치하는지 확인
+    // 비밀번호가 일치하면 계정 정보를 응답한다.
+    const valid = await user.checkPassword(password);
+    // 비밀번호가 일치하지 않으면 에러 처리
+    if (!valid) {
+      ctx.status = 401;
+      return;
+    }
+
+    // hashedPassword 필드를 삭제한 데이터 반환
+    ctx.body = user.serialize();
+  } catch (e) {
+    ctx.throw(500, e);
+  }
 };
 
 /* 로그인 상태 확인 ------------------------------- */
