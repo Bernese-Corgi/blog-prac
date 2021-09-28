@@ -1,70 +1,83 @@
-/* ------------------------------- post id 초기값 ------------------------------ */
-let postId = 1;
-
-/* ----------------------------- posts 배열 초기 데이터 ---------------------------- */
-const posts = [{ id: 1, title: '제목', body: '내용' }];
+import Post from '../../models/post';
 
 /* --------------------------------- 포스트 작성 --------------------------------- */
 // POST /api/posts { title, body }
-export const write = (ctx) => {
+// { title: '제목', body: '내용', tags: [ '태그1', '태그2' ] }
+export const write = async (ctx) => {
   // REST API의 Request Body는 ctx.request.body에서 조회할 수 있다.
-  const { title, body } = ctx.request.body;
-  // 기존 postId 값에 1을 더한다
-  postId += 1;
+  const { title, body, tags } = ctx.request.body;
 
-  const post = { id: postId, title, body };
-  posts.push(post);
-
-  ctx.body = post;
+  // Post의 인스턴스 생성 : new 키워드 사용
+  const post = new Post({ title, body, tags }); // 매개변수 : 정보를 지닌 객체 전달
+  try {
+    /** save()
+     * @returns Promise 객체
+     * await를 사용해 데이터 베이스 저장 요청을 완료할 때까지 대기할 수 있다.
+     */
+    await post.save();
+    ctx.body = post;
+  } catch (e) {
+    ctx.throw(500, e);
+  }
 };
 
 /* -------------------------------- 포스트 목록 조회 ------------------------------- */
 // GET /api/posts
-export const list = (ctx) => {
-  ctx.body = posts;
+export const list = async (ctx) => {
+  try {
+    /** find([callback])
+     * @param callback
+     */
+    /** exec()
+     * 서버에 쿼리 요청
+     * 데이터를 조회할 때 특정 조건을 설정하고, 불러오는 제한 설정 가능
+     */
+    const posts = await Post.find().exec();
+    ctx.body = posts;
+  } catch (e) {
+    ctx.throw(500, e);
+  }
 };
 
 /* -------------------------------- 특정 포스트 조회 ------------------------------- */
 // GET /api/posts/:id
-export const read = (ctx) => {
+export const read = async (ctx) => {
   const { id } = ctx.params;
-  // 주어진 id 값으로 포스트를 찾는다
-  // 파라미터로 받아온 값은 문자열 형식이므로 파라미터를 숫자로 반환하거나 비교할 p.id 값을 문자열로 변경해야 한다.
-  const post = posts.find((p) => p.id.toString() === id);
+  try {
+    // findById 특정 id를 가진 데이터를 조회
+    const post = await Post.findById(id).exec();
 
-  // 포스트가 없으면 오류를 반환
-  if (!post) {
-    ctx.status = 404;
-    ctx.body = { message: '포스트가 존재하지 않습니다.' };
-    return;
+    // 포스트가 없으면 오류를 반환
+    if (!post) {
+      ctx.status = 404; // Not Found
+      return;
+    }
+
+    ctx.body = post;
+  } catch (e) {
+    ctx.throw(500, e);
   }
-
-  ctx.body = post;
 };
 
 /* -------------------------------- 특정 포스트 제거 ------------------------------- */
 // DELETE /api/posts/:id
-export const remove = (ctx) => {
+export const remove = async (ctx) => {
   const { id } = ctx.params;
 
-  // 해당 id를 가진 post가 몇 번째인지 확인
-  const index = posts.findIndex((p) => p.id.toString() === id);
-
-  // 포스트가 없으면 오류를 반환
-  if (index === -1) {
-    ctx.status = 404;
-    ctx.body = { message: '포스트가 존재하지 않습니다.' };
-    return;
+  try {
+    /** 데이터 삭제할 때 사용할 수 있는 함수
+     * remove(): 특정 조건을 만족하는 데이터를 모두 지운다.
+     * findByIdAndRemove(): id를 찾아서 지운다.
+     * findOneAndRemove(): 특정 조건을 만족하는 데이터 하나를 찾아서 제거한다.
+     */
+    await Post.findByIdAndRemove(id).exec();
+    ctx.status = 204; // No Content
+  } catch (e) {
+    ctx.throw(500, e);
   }
-
-  // index번 째 아이템을 제거
-  posts.splice(index, 1);
-
-  // No content
-  ctx.status = 204;
 };
 
-/* ------------------------------- 포스트 수정 (교체) ------------------------------ */
+/* ------------------------------- 포스트 수정 (교체) ------------------------------
 // PUT /api/posts/:id { title, body }
 // PUT : 전체 포스트 정보를 입력해 데이터를 통째로 교환할 때 사용
 export const replace = (ctx) => {
@@ -88,28 +101,35 @@ export const replace = (ctx) => {
 
   ctx.body = posts[index];
 };
+*/
 
 /* ---------------------------- 포스트 수정 (특정 필드 변경) --------------------------- */
 // PATCH /api/posts/:id { title, body }
 // PATCH 메서드는 주어진 필드만 교체한다
-export const update = (ctx) => {
+export const update = async (ctx) => {
   const { id } = ctx.params;
 
-  // 해당 id를 가진 post가 몇 번째인지 확인한다.
-  const index = posts.findIndex((p) => p.id.toString() === id);
+  try {
+    /** findByIdAndUpdate()
+     * @param id?: 찾을 아이디
+     * @param update?: 업데이트 내용
+     * @param options?: 업데이트의 옵션
+     */
+    const post = await Post.findByIdAndUpdate(id, ctx.request.body, {
+      /** new
+       * true : 업데이트된 데이터를 반환
+       * false : 업데이트되기 전의 데이터 반환
+       */
+      new: true,
+    }).exec();
 
-  // 포스트가 없으면 오류를 반환
-  if (index === -1) {
-    ctx.status = 404;
-    ctx.body = { message: '포스트가 존재하지 않습니다.' };
-    return;
+    if (!post) {
+      ctx.status = 404;
+      return;
+    }
+
+    ctx.body = post;
+  } catch (e) {
+    ctx.throw(500, e);
   }
-
-  // 기존 값에 정보를 덮어 씌운다
-  posts[index] = {
-    ...posts[index], // 기존 값
-    ...ctx.request.body, // 새로 덮어씌울 값
-  };
-
-  ctx.body = posts[index];
 };

@@ -19,5 +19,4 @@ const PostSchema = new Schema({
  * 데이터베이스는 스키마 이름을 정하면, 그 이름의 복수 형태로 데이터베이스에 컬렉션 이름을 만든다. (스키마 이름 Post -> 컬렉션 이름 posts)
  */
 const Post = mongoose.model('Post', PostSchema);
-mongoose.model();
 export default Post;
