@@ -55,6 +55,13 @@ export const write = async (ctx) => {
 /* -------------------------------- 포스트 목록 조회 ------------------------------- */
 // GET /api/posts
 export const list = async (ctx) => {
+  const page = parseInt(ctx.query.page || '1', 10);
+
+  if (page < 1) {
+    ctx.status = 400;
+    return;
+  }
+
   try {
     /** find([callback])
      * @param callback
@@ -66,6 +73,7 @@ export const list = async (ctx) => {
     const posts = await Post.find()
       .sort({ _id /*정렬할 필드*/: -1 /*내림차순*/ })
       .limit(10) // 보이는 개수 제한
+      .skip((page - 1) * 10)
       .exec();
     ctx.body = posts;
   } catch (e) {
