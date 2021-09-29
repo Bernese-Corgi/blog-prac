@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 /* ----------------------------------- 스키마 ---------------------------------- */
 const UserSchema = new Schema({
@@ -37,6 +38,25 @@ UserSchema.methods.serialize = function () {
   const data = this.toJSON();
   delete data.hashedPassword;
   return data;
+};
+
+/** generateToken()
+ * 토큰을 생성하는 메서드
+ * @returns 생성된 토큰
+ */
+UserSchema.methods.generateToken = function () {
+  /** sign(payload, secretOrPrivateKey[, options])
+   * 지정된 페이로드를 JSON 웹 토큰 문자열 페이로드에 동기적으로 서명합니다.
+   * @param payload 서명할 페이로드. 리터럴, 버퍼, 문자열
+   * @param secretOrPrivateKey JWT 암호. HMAC 알고리즘에 대한 비밀 또는 RSA 및 ECDSA에 대해 PEM으로 인코딩된 개인 키
+   * @param [options] 서명 반환 옵션
+   */
+  const token = jwt.sign(
+    { _id: this.id, username: this.username },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' /*7일동안 유효*/ },
+  );
+  return token;
 };
 
 /* --------------------------------- 정적 메서드 --------------------------------- */
