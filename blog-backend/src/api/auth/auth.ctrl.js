@@ -115,6 +115,9 @@ export const check = async (ctx) => {
 };
 
 /* 로그아웃 ---------------------------------- */
+// POST /api/auth/logout
 export const logout = async (ctx) => {
-  //
+  // 쿠키 지우기
+  ctx.cookies.set('access_token');
+  ctx.status = 204; // No Content
 };

@@ -4,12 +4,10 @@ import User from '../models/user';
 const jwtMiddleware = async (ctx, next) => {
   // get token
   const token = ctx.cookies.get('access_token');
-  console.log(`token: ${token}`);
 
   // 토큰이 없으면 다음 미들웨어 실행
   if (!token) return next();
 
-  //
   try {
     /** verify(token, secretOrPublicKey[, options])
      * 디코딩된 토큰을 얻기 위해 비밀 또는 공개 키를 사용하여 주어진 토큰을 동기적으로 확인
@@ -32,7 +30,6 @@ const jwtMiddleware = async (ctx, next) => {
       _id: decoded._id,
       username: decoded.username,
     };
-    console.log(decoded);
 
     // 토큰 재발급
     const now = Math.floor(Date.now() / 1000);
