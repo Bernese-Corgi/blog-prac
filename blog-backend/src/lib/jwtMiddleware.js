@@ -1,8 +1,10 @@
 import jwt from 'jsonwebtoken';
+import User from '../models/user';
 
-const jwtMiddleware = (ctx, next) => {
+const jwtMiddleware = async (ctx, next) => {
   // get token
   const token = ctx.cookies.get('access_token');
+  console.log(`token: ${token}`);
 
   // 토큰이 없으면 다음 미들웨어 실행
   if (!token) return next();
@@ -21,8 +23,8 @@ const jwtMiddleware = (ctx, next) => {
     {
       _id: '6153f88e644379fb557b5bc2',
       username: 'sijung',
-      iat: 1632893070,
-      exp: 1633497870
+      iat: 1632893070, // iat: 토큰 발행 날짜
+      exp: 1633497870 // exp: 토큰 만료 날짜
     }
     */
     // 해석된 결과(decoded)를 ctx의 state에 넣는다.
@@ -31,6 +33,18 @@ const jwtMiddleware = (ctx, next) => {
       username: decoded.username,
     };
     console.log(decoded);
+
+    // 토큰 재발급
+    const now = Math.floor(Date.now() / 1000);
+    if (decoded.exp - now < 60 * 60 * 24 * 3.5) {
+      // 토큰의 남은 유효 기간이 3.5일 미만인 경우 재발급
+      const user = await User.findById(decoded._id);
+      const token = user.generateToken();
+      ctx.cookies.set('access_token', token, {
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7일
+        httpOnly: true,
+      });
+    }
 
     // 모든 처리 완료 후 다음 미들웨어 실행
     return next();
