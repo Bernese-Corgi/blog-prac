@@ -105,7 +105,9 @@ export const login = async (ctx) => {
 // GET /api/auth/check
 export const check = async (ctx) => {
   const { user } = ctx.state;
+  // user가 없으면 수행할 작업
   if (!user) {
+    // 로그인 중이 아님
     ctx.status = 401; // Unathorized
     return;
   }
