@@ -9,10 +9,10 @@ posts.post('/', checkLoggedIn, postsCtrl.write);
 
 const post = new Router(); // /api/posts/:id
 post.get('/', postsCtrl.read);
-post.delete('/', checkLoggedIn, postsCtrl.remove);
-post.patch('/', checkLoggedIn, postsCtrl.update);
+post.delete('/', checkLoggedIn, postsCtrl.checkOwnPost, postsCtrl.remove);
+post.patch('/', checkLoggedIn, postsCtrl.checkOwnPost, postsCtrl.update);
 
-posts.use('/:id', postsCtrl.checkObjectId, post.routes());
+posts.use('/:id', postsCtrl.getPostById, post.routes());
 
 /* 아래와 같이 작성할 수도 있다. ---------------------------------
 posts.get('/', postsCtrl.list);

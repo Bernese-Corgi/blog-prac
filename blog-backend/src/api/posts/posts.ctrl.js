@@ -2,14 +2,45 @@ import Post from '../../models/post';
 import mongoose from 'mongoose';
 import Joi from 'joi';
 
-/* ------------------------------- 요청 검증 미들웨어 ------------------------------- */
+/* ---------------------------------- 미들웨어 ---------------------------------- */
 const { ObjectId } = mongoose.Types;
 
-export const checkObjectId = (ctx, next) => {
+/* 요청 검증, id로 post 찾기 미들웨어 ------------------------ */
+export const getPostById = async (ctx, next) => {
   const { id } = ctx.params;
 
   if (!ObjectId.isValid(id)) {
     ctx.status = 400; // Bad Request
+    return;
+  }
+
+  try {
+    // id로 포스트 찾기
+    const post = await Post.findById(id);
+
+    // 포스트가 존재하지 않으면 Not Found
+    if (!post) {
+      ctx.status = 404; // Not Found
+      return;
+    }
+    // ctx.state에 포스트 넣기
+    ctx.state.post = post;
+    console.log(ctx.state);
+
+    return next();
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
+
+/* 로그인 중인 사용자가 작성한 포스트인지 확인하는 미들웨어 -------------------- */
+export const checkOwnPost = (ctx, next) => {
+  const { user, post } = ctx.state;
+
+  // 사용자가 작성한 포스트가 아니면 403 에러 발생
+  if (post.user._id.toString() !== user._id) {
+    // MongoDB에서 조회한 데이터의 id 값을 문자열과 비교할 때는 반드시 .toString() 메서드로 문자열로 변환해야한다.
+    ctx.status = 403;
     return;
   }
   return next();
@@ -99,21 +130,7 @@ export const list = async (ctx) => {
 /* -------------------------------- 특정 포스트 조회 ------------------------------- */
 // GET /api/posts/:id
 export const read = async (ctx) => {
-  const { id } = ctx.params;
-  try {
-    // findById 특정 id를 가진 데이터를 조회
-    const post = await Post.findById(id).exec();
-
-    // 포스트가 없으면 오류를 반환
-    if (!post) {
-      ctx.status = 404; // Not Found
-      return;
-    }
-
-    ctx.body = post;
-  } catch (e) {
-    ctx.throw(500, e);
-  }
+  ctx.body = ctx.state.body;
 };
 
 /* -------------------------------- 특정 포스트 제거 ------------------------------- */
