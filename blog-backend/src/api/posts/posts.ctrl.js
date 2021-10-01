@@ -98,6 +98,19 @@ export const list = async (ctx) => {
     return;
   }
 
+  // 포스트 필터링
+  const { tag, username } = ctx.query;
+  // 쿼리
+  const query = {
+    // .../api/posts?username=jinyoung
+    ...(username ? { 'user.username': username } : {}), // username이 유효하면 객체 안에 넣고, 유효하지 않으면 넣지 않는다.
+    // .../api/posts?tag=태그
+    ...(tag ? { tags: tag } : {}), // tag가 유효하면 객체 안에 넣고, 유효하지 않으면 넣지 않는다.
+  };
+  /* 위의 형식으로 query 객체를 만들면, 유효하지 않은 경우 아래와 같이 만들어진다.
+  { username, tags: tag }
+  이런 객체를 query로 사용하면 요청을 받을 때 username이나 tag 값이 주어지지 않는다. -> mongoose가 데이터를 조회할 수 없다. */
+
   try {
     /** find([callback])
      * @param callback
@@ -106,7 +119,7 @@ export const list = async (ctx) => {
      * 서버에 쿼리 요청
      * 데이터를 조회할 때 특정 조건을 설정하고, 불러오는 제한 설정 가능
      */
-    const posts = await Post.find()
+    const posts = await Post.find(query)
       .sort({ _id /*정렬할 필드*/: -1 /*내림차순*/ })
       .limit(10) // 보이는 개수 제한
       .skip((page - 1) * 10) // 페이지를 10개씩 띄우기
@@ -114,7 +127,7 @@ export const list = async (ctx) => {
       .exec();
 
     // 마지막 페이지 번호
-    const postCount = await Post.countDocuments().exec();
+    const postCount = await Post.countDocuments(query).exec();
     ctx.set('Last-page', Math.ceil(postCount / 10));
 
     ctx.body = posts.map((post) => ({

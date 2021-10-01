@@ -1,10 +1,11 @@
 import Router from 'koa-router';
 import * as postsCtrl from './posts.ctrl';
-import checkLoggedIn from '../../lib/checkedLoggedIn';
+import checkLoggedIn from '../../lib/checkLoggedIn';
 
 /* --------------------------------- 라우트 설정 --------------------------------- */
 const posts = new Router();
 posts.get('/', postsCtrl.list);
+// posts.post('/', checkLoggedIn, postsCtrl.write);
 posts.post('/', checkLoggedIn, postsCtrl.write);
 
 const post = new Router(); // /api/posts/:id
