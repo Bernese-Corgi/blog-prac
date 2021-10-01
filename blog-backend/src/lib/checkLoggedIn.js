@@ -3,8 +3,9 @@ const checkLoggedIn = (ctx, next) => {
   if (!ctx.state.user) {
     ctx.status = 401; // Unauthorized
     // 로그인 상태면 그 다음 미들웨어를 실행한다.
-    return next();
+    return;
   }
+  return next();
 };
 
 export default checkLoggedIn;
