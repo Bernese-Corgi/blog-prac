@@ -39,7 +39,7 @@ export const write = async (ctx) => {
   const { title, body, tags } = ctx.request.body;
 
   // Post의 인스턴스 생성 : new 키워드 사용
-  const post = new Post({ title, body, tags }); // 매개변수 : 정보를 지닌 객체 전달
+  const post = new Post({ title, body, tags, user: ctx.state.user }); // 매개변수 : 정보를 지닌 객체 전달
   try {
     /** save()
      * @returns Promise 객체

@@ -2,14 +2,17 @@ import Router from 'koa-router';
 import * as postsCtrl from './posts.ctrl';
 import checkLoggedIn from '../../lib/checkedLoggedIn';
 
-const posts = new Router();
-
 /* --------------------------------- 라우트 설정 --------------------------------- */
+const posts = new Router();
 posts.get('/', postsCtrl.list);
 posts.post('/', checkLoggedIn, postsCtrl.write);
-posts.get('/:id', postsCtrl.checkObjectId, postsCtrl.read);
-posts.delete('/:id', checkLoggedIn, postsCtrl.checkObjectId, postsCtrl.remove);
-posts.patch('/:id', checkLoggedIn, postsCtrl.checkObjectId, postsCtrl.update);
+
+const post = new Router(); // /api/posts/:id
+post.get('/', postsCtrl.read);
+post.delete('/', checkLoggedIn, postsCtrl.remove);
+post.patch('/', checkLoggedIn, postsCtrl.update);
+
+posts.use('/:id', postsCtrl.checkObjectId, post.routes());
 
 /* 아래와 같이 작성할 수도 있다. ---------------------------------
 posts.get('/', postsCtrl.list);
