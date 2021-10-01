@@ -25,7 +25,6 @@ export const getPostById = async (ctx, next) => {
     }
     // ctx.state에 포스트 넣기
     ctx.state.post = post;
-    console.log(ctx.state);
 
     return next();
   } catch (e) {
