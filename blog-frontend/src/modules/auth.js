@@ -4,7 +4,7 @@ import createRequestSaga, {
   createRequestActionTypes,
 } from '../lib/createRequestSaga';
 import * as authAPI from '../lib/api/auth';
-import { takeLatest } from '@redux-saga/core/effects';
+import { takeLatest } from 'redux-saga/effects';
 
 /* ---------------------------------- 액션 타입 --------------------------------- */
 // auth 공통 액션
