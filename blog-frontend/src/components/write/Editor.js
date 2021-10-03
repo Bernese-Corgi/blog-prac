@@ -33,13 +33,14 @@ const QuillWrapper = styled.div`
   }
 `;
 
-const Editor = () => {
+const Editor = ({ title, body, onChangeField }) => {
   // Quill을 적용할 DivElement를 설정
   const quillElement = useRef(null);
-  // Quill 인스턴스 생성
+  // Quill 인스턴스 참조
   const quillInstance = useRef(null);
 
   useEffect(() => {
+    /* quill 인스턴스 생성 ----------------------------- */
     quillInstance.current = new Quill(quillElement.current, {
       theme: 'bubble',
       placeholder: '내용을 작성하세요...',
@@ -53,11 +54,36 @@ const Editor = () => {
         ],
       },
     });
-  }, []);
+
+    /* quill에 text-change 이벤트 핸들러 등록 --------------------- */
+    const quill = quillInstance.current;
+    // quill 에디터의 변화 내용을 리덕스 스토어에 저장
+    /** text-change 이벤트
+     * Quill의 내용이 변경되었을 떄 발생.
+     * delta: 변경 내용
+     * oldDelta: 변경 전 편집기 내용의 표시
+     * source: 변경 내용
+     * source가 사용자로부터 시작된 경우 source는 'user'가 된다.
+     */
+    quill.on('text-change', (delta, oldDelta, source) => {
+      if (source === 'user') {
+        onChangeField({ key: 'body', value: quill.root.innerHTML });
+      }
+    });
+  }, [onChangeField]);
+
+  /* title input change 이벤트 ------------------------- */
+  const onChangeTitle = (e) => {
+    onChangeField({ key: 'title', value: e.target.value });
+  };
 
   return (
     <EditorBlock>
-      <TitleInput placeholder="제목을 입력하세요" />
+      <TitleInput
+        placeholder="제목을 입력하세요"
+        onChange={onChangeTitle}
+        value={title}
+      />
       <QuillWrapper>
         <div ref={quillElement} />
       </QuillWrapper>
