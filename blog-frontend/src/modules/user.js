@@ -24,9 +24,25 @@ export const check = createAction(CHECK);
 // 회원 정보 확인
 const checkSaga = createRequestSaga(CHECK, authAPI.check);
 
+// CHECK 액션 디스패치 실패 사가 함수
+function checkFailureSaga() {
+  // CHECK 액션이 디스패치되면 사가를 통해 /api/check API를 호출
+  // 이 API는 성공할 수도 있고, 실패할 수도 있다.
+  // 만약 실패하면, 사용자 상태를 초기화해야 하고 localStorage에 들어 있는 값도 지워야 한다.
+  try {
+    // localStroage에서 user를 제거
+    localStorage.removeItem('user');
+    // user 값 초기화는 리듀서에서 처리하고 있으므로 신경쓰지 않아도 된다.
+  } catch (e) {
+    console.log('localStorage is not working');
+  }
+}
+
 // user saga
 export function* userSaga() {
   yield takeLatest(CHECK, checkSaga);
+  // CHECK_FAILURE 액션이 발생할 때 checkFailureSaga 함수 호출
+  yield takeLatest(CHECK_FAILURE, checkFailureSaga);
 }
 
 /* ---------------------------------- 초기 상태 --------------------------------- */
