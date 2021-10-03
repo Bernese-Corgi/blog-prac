@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { palette } from '../../lib/styles';
 
@@ -88,7 +88,7 @@ const TagList = React.memo(({ tags, onRemove }) => (
 ));
 
 /* ---------------------------------- 태그 박스 --------------------------------- */
-const TagBox = () => {
+const TagBox = ({ tags, onChangeTags }) => {
   /* 상태 관리 --------------------------------- */
   const [input, setInput] = useState('');
   const [localTags, setLocalTags] = useState([]);
@@ -101,9 +101,13 @@ const TagBox = () => {
       // 이미 존재하면 추가하지 않음
       if (localTags.includes(tag)) return;
       // 태그 추가
-      setLocalTags([...localTags, tag]);
+      const nextTags = [...localTags, tag];
+      setLocalTags(nextTags);
+      /* TagBox 컴포넌트 내부에서 상태가 바뀌면 리덕스 스토어에 반영
+      추가된 태그를 onChangeTags에 전달 (write 모듈의 필드 중 태그 값의 변화를 적용하는 디스패치를 수행하는 함수) */
+      onChangeTags(nextTags);
     },
-    [localTags],
+    [localTags, onChangeTags],
   );
 
   /* 태그 삭제 이벤트 ------------------------------- */
@@ -130,6 +134,12 @@ const TagBox = () => {
     },
     [input, insertTag],
   );
+
+  /* props로 받아온 tags 값이 바뀔때 localTags 상태 업데이트 ---------------- */
+  useEffect(() => {
+    // 리덕스 스토어의 값이 바뀌면 TagBox 컴포넌트 내부의 상태도 변경
+    setLocalTags(tags);
+  }, [tags]);
 
   return (
     <TagBoxBlock>
