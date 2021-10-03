@@ -3,7 +3,7 @@ import createRequestSaga, {
   createRequestActionTypes,
 } from '../lib/createRequestSaga';
 import * as authAPI from '../lib/api/auth';
-import { takeLatest } from '@redux-saga/core/effects';
+import { call, takeLatest } from '@redux-saga/core/effects';
 
 /* ---------------------------------- 액션 타입 --------------------------------- */
 // 새로고침 이후 임시 로그인 처리
@@ -13,12 +13,19 @@ const TEMP_SET_USER = 'user/TEMP_SET_USER';
 const [CHECK, CHECK_SUCCESS, CHECK_FAILURE] =
   createRequestActionTypes('user/CHECK');
 
+// 로그아웃
+// 로그아웃의 경우에는 성공/실패 여부가 중요하지 않으므로 LOGOUT_SUCCESS, LOGOUT_FAILURE와 같은 액션은 따로 만들지 않아도 된다.
+const LOGOUT = 'user/LOGOUT';
+
 /* -------------------------------- 액션 생성 함수 -------------------------------- */
 // 새로고침 이후 임시 로그인 처리
 export const tempSetUser = createAction(TEMP_SET_USER, (user) => user);
 
 // 회원 정보 확인
 export const check = createAction(CHECK);
+
+// 로그아웃
+export const logout = createAction(LOGOUT);
 
 /* ---------------------------------- 사가 함수 --------------------------------- */
 // 회원 정보 확인
@@ -38,11 +45,24 @@ function checkFailureSaga() {
   }
 }
 
+// 로그아웃
+function* logoutSaga() {
+  try {
+    // logout API 호출
+    yield call(authAPI.logout);
+    // localStorage에서 user를 제거
+    localStorage.removeItem('user');
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 // user saga
 export function* userSaga() {
   yield takeLatest(CHECK, checkSaga);
   // CHECK_FAILURE 액션이 발생할 때 checkFailureSaga 함수 호출
   yield takeLatest(CHECK_FAILURE, checkFailureSaga);
+  yield takeLatest(LOGOUT, logoutSaga);
 }
 
 /* ---------------------------------- 초기 상태 --------------------------------- */
@@ -65,6 +85,7 @@ export default handleActions(
       user: null,
       checkError: error,
     }),
+    [LOGOUT]: (state) => ({ ...state, user: null }),
   },
   initialState,
 );
