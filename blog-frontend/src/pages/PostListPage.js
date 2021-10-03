@@ -1,11 +1,12 @@
 import React from 'react';
-import { Button } from '../components/common';
+import { Header } from '../components/common';
 
 const PostListPage = () => {
   return (
-    <div>
-      <Button>버튼</Button>
-    </div>
+    <>
+      <Header />
+      <div>안녕하세요.</div>
+    </>
   );
 };
 
