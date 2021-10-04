@@ -1,6 +1,32 @@
 import Post from '../../models/post';
 import mongoose from 'mongoose';
 import Joi from 'joi';
+import sanitizeHtml from 'sanitize-html';
+
+/* ------------------------------ sanitize html ----------------------------- */
+const sanitizeOption = {
+  allowedTags: [
+    'h1',
+    'h2',
+    'b',
+    'i',
+    'u',
+    's',
+    'p',
+    'ul',
+    'ol',
+    'li',
+    'blockquote',
+    'a',
+    'img',
+  ],
+  allowedAttributes: {
+    a: ['href', 'name', 'target'],
+    img: ['src'],
+    li: ['class'],
+  },
+  allowedSchemes: ['data', 'http'],
+};
 
 /* ---------------------------------- 미들웨어 ---------------------------------- */
 const { ObjectId } = mongoose.Types;
@@ -69,7 +95,12 @@ export const write = async (ctx) => {
   const { title, body, tags } = ctx.request.body;
 
   // Post의 인스턴스 생성 : new 키워드 사용
-  const post = new Post({ title, body, tags, user: ctx.state.user }); // 매개변수 : 정보를 지닌 객체 전달
+  const post = new Post({
+    title,
+    body: sanitizeHtml(body, sanitizeOption),
+    tags,
+    user: ctx.state.user,
+  }); // 매개변수 : 정보를 지닌 객체 전달
   try {
     /** save()
      * @returns Promise 객체
@@ -83,6 +114,11 @@ export const write = async (ctx) => {
 };
 
 /* -------------------------------- 포스트 목록 조회 ------------------------------- */
+// html을 없애고, 200자 제한하는 함수
+const removeHtmlAndShorten = (body) => {
+  const filtered = sanitizeHtml(body, { allowedTags: [] });
+  return filtered.length < 200 ? filtered : `${filtered.slice(0, 200)}`;
+};
 // GET /api/posts
 export const list = async (ctx) => {
   // ctx의 쿼리에서 페이지 참조하기
@@ -131,8 +167,7 @@ export const list = async (ctx) => {
 
     ctx.body = posts.map((post) => ({
       ...post,
-      body:
-        post.body.length < 200 ? post.body : `${post.body.slice(0, 200)}...`,
+      body: removeHtmlAndShorten(post.body),
     }));
   } catch (e) {
     ctx.throw(500, e);
@@ -210,13 +245,20 @@ export const update = async (ctx) => {
 
   const { id } = ctx.params;
 
+  // 객체 복사
+  const nextData = { ...ctx.request.body };
+  // body 값이 주어졌으면 HTML 필터링
+  if (nextData.body) {
+    nextData.body = sanitizeHtml(nextData.body);
+  }
+
   try {
     /** findByIdAndUpdate()
      * @param id?: 찾을 아이디
      * @param update?: 업데이트 내용
      * @param options?: 업데이트의 옵션
      */
-    const post = await Post.findByIdAndUpdate(id, ctx.request.body, {
+    const post = await Post.findByIdAndUpdate(id, nextData, {
       /** new
        * true : 업데이트된 데이터를 반환
        * false : 업데이트되기 전의 데이터 반환
