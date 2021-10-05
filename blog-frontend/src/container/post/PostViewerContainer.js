@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withRouter } from 'react-router';
 import { readPost, unloadPost } from '../../modules/post';
-import { PostViewer } from '../../components/post';
+import { PostActionButtons, PostViewer } from '../../components/post';
 
 const PostViewerContainer = ({ match }) => {
   // URL 파라미터로 받아온 id 값을 조회
@@ -25,7 +25,14 @@ const PostViewerContainer = ({ match }) => {
     };
   }, [dispatch, postId]);
 
-  return <PostViewer post={post} loading={loading} error={error} />;
+  return (
+    <PostViewer
+      post={post}
+      loading={loading}
+      error={error}
+      actionButtons={<PostActionButtons />}
+    />
+  );
 };
 
 export default withRouter(PostViewerContainer);
