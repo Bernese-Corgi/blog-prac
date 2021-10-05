@@ -3,7 +3,7 @@ import createRequestSaga, {
   createRequestActionTypes,
 } from '../lib/createRequestSaga';
 import * as postsAPI from '../lib/api/posts';
-import { take, takeLatest } from '@redux-saga/core/effects';
+import { takeLatest } from '@redux-saga/core/effects';
 
 /* ---------------------------------- 액션 타입 --------------------------------- */
 // 모든 내용 초기화

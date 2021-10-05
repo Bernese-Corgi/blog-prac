@@ -3,3 +3,4 @@ export { default as Header } from './Header';
 export { default as Responsive } from './Responsive';
 export { default as SubInfo } from './SubInfo';
 export { default as Tags } from './Tags';
+export { default as AskModal } from './AskModal';
