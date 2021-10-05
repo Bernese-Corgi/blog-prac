@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { palette } from '../../lib/styles';
-import { Responsive, SubInfo, Tags } from '../common';
+import Responsive from '../common/Responsive';
+import { SubInfo, Tags } from '../common';
 
 /**
  * 포스트 정보 보여주는 컴포넌트

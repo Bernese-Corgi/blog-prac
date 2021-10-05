@@ -31,12 +31,18 @@ export function* postsSaga() {
 const initialState = {
   posts: null,
   error: null,
+  lastPage: 1,
 };
 
 /* ----------------------------------- 리듀서 ---------------------------------- */
 const posts = handleActions(
   {
-    [LIST_POST_SUCCESS]: (state, { payload: posts }) => ({ ...state, posts }),
+    [LIST_POST_SUCCESS]: (state, { payload: posts, meta: response }) => ({
+      ...state,
+      posts,
+      // 문자열을 숫자로 변환
+      lastPage: parseInt(response.headers['last-page'], 10),
+    }),
     [LIST_POST_FAILURE]: (state, { payload: error }) => ({ ...state, error }),
   },
   initialState,
