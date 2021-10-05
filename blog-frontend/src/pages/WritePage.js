@@ -5,14 +5,20 @@ import {
   TagBoxContainer,
   WriteActionButtonsContainer,
 } from '../container/write';
+import { Helmet } from 'react-helmet-async';
 
 const WritePage = () => {
   return (
-    <Responsive>
-      <EditorContainer />
-      <TagBoxContainer />
-      <WriteActionButtonsContainer />
-    </Responsive>
+    <>
+      <Helmet>
+        <title>글 작성하기 - JBLOG</title>
+      </Helmet>
+      <Responsive>
+        <EditorContainer />
+        <TagBoxContainer />
+        <WriteActionButtonsContainer />
+      </Responsive>
+    </>
   );
 };
 

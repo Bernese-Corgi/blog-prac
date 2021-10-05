@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Helmet } from 'react-helmet-async';
 import { palette } from '../../lib/styles';
 import Responsive from '../common/Responsive';
 import { SubInfo, Tags } from '../common';
@@ -52,6 +53,9 @@ const PostViewer = ({ post, error, loading, actionButtons }) => {
 
   return (
     <PostViewerBlock>
+      <Helmet>
+        <title>{title} - JBLOG</title>
+      </Helmet>
       <PostHead>
         <h1>{title}</h1>
         <SubInfo
