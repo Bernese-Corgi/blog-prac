@@ -4,6 +4,7 @@ import { withRouter } from 'react-router';
 import { readPost, unloadPost } from '../../modules/post';
 import { PostActionButtons, PostViewer } from '../../components/post';
 import { setOriginalPost } from '../../modules/write';
+import { removePost } from '../../lib/api/posts';
 
 const PostViewerContainer = ({ match, history }) => {
   // URL 파라미터로 받아온 id 값을 조회
@@ -37,12 +38,23 @@ const PostViewerContainer = ({ match, history }) => {
     history.push('/write');
   };
 
+  /* 삭제 버튼 클릭 시 이벤트 ----------------------------- */
+  const onRemove = async () => {
+    try {
+      await removePost(postId);
+      // 홈으로 이동
+      history.push('/');
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <PostViewer
       post={post}
       loading={loading}
       error={error}
-      actionButtons={<PostActionButtons onEdit={onEdit} />}
+      actionButtons={<PostActionButtons onEdit={onEdit} onRemove={onRemove} />}
       ownPost={user && user.id === post && post.id}
     />
   );
