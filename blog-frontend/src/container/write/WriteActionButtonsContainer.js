@@ -2,21 +2,30 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withRouter } from 'react-router';
 import { WriteActionButtons } from '../../components/write';
-import { writePost } from '../../modules/write';
+import { updatePost, writePost } from '../../modules/write';
 
 const WriteActionButtonsContainer = ({ history }) => {
   const dispatch = useDispatch();
 
-  const { title, body, tags, post, postError } = useSelector(({ write }) => ({
-    title: write.title,
-    body: write.body,
-    tags: write.tags,
-    post: write.post,
-    postError: write.postError,
-  }));
+  const { title, body, tags, post, postError, originalPostId } = useSelector(
+    ({ write }) => ({
+      title: write.title,
+      body: write.body,
+      tags: write.tags,
+      post: write.post,
+      postError: write.postError,
+      originalPostId: write.originalPostId,
+    }),
+  );
 
   /* 포스트 등록 --------------------------------- */
   const onPublish = () => {
+    // originalPostId 값이 존재하면 writePost 대신 updatePost 액션 생성 함수를 사용
+    if (originalPostId) {
+      dispatch(updatePost({ title, body, tags, id: originalPostId }));
+      return;
+    }
+
     // 리덕스 스토어 안에 들어 있는 값 사용해 새 포스트 작성
     dispatch(writePost({ title, body, tags }));
   };
@@ -41,7 +50,13 @@ const WriteActionButtonsContainer = ({ history }) => {
     }
   }, [history, post, postError]);
 
-  return <WriteActionButtons onPublish={onPublish} onCancel={onCancel} />;
+  return (
+    <WriteActionButtons
+      onPublish={onPublish}
+      onCancel={onCancel}
+      isEdit={!!originalPostId}
+    />
+  );
 };
 
 export default withRouter(WriteActionButtonsContainer);

@@ -19,6 +19,10 @@ const [WRITE_POST, WRITE_POST_SUCCESS, WRITE_POST_FAILURE] =
 // 수정 버튼 클릭 시 글쓰기 페이지로 이동
 const SET_ORIGINAL_POST = 'write/SET_ORIGINAL_POST';
 
+// 포스트 수정
+const [UPDATE_POST, UPDATE_POST_SUCCESS, UPDATE_POST_FAILURE] =
+  createRequestActionTypes('write/UPDATE_POST');
+
 /* -------------------------------- 액션 생성 함수 -------------------------------- */
 // 모든 내용 초기화
 export const initialize = createAction(INITIALIZE);
@@ -39,13 +43,23 @@ export const writePost = createAction(WRITE_POST, ({ title, body, tags }) => ({
 // 수정 버튼 클릭 시 글쓰기 페이지로 이동
 export const setOriginalPost = createAction(SET_ORIGINAL_POST, (post) => post);
 
+// 포스트 수정
+export const updatePost = createAction(
+  UPDATE_POST,
+  ({ id, title, body, tags }) => ({ id, title, body, tags }),
+);
+
 /* ---------------------------------- saga ---------------------------------- */
 // 수정 버튼 클릭 시 글쓰기 페이지로 이동
 const writePostSaga = createRequestSaga(WRITE_POST, postsAPI.writePost);
 
+// 포스트 수정
+const updatePostSaga = createRequestSaga(UPDATE_POST, postsAPI.updatePost);
+
 // write saga
 export function* writeSaga() {
   yield takeLatest(WRITE_POST, writePostSaga);
+  yield takeLatest(UPDATE_POST, updatePostSaga);
 }
 
 /* ---------------------------------- 초기 상태 --------------------------------- */
@@ -84,6 +98,13 @@ const write = handleActions(
       body: post.body,
       tags: post.tags,
       originalPostId: post._id,
+    }),
+    // 포스트 수정 성공
+    [UPDATE_POST_SUCCESS]: (state, { payload: post }) => ({ ...state, post }),
+    // 포스트 수정 실패
+    [UPDATE_POST_FAILURE]: (state, { payload: postError }) => ({
+      ...state,
+      postError,
     }),
   },
   initialState,

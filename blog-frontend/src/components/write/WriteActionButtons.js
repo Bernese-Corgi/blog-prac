@@ -22,11 +22,12 @@ const StyledButton = styled(Button)`
   }
 `;
 
-const WriteActionButtons = ({ onCancel, onPublish }) => {
+const WriteActionButtons = ({ onCancel, onPublish, isEdit }) => {
   return (
     <WriteActionButtonsBlock>
       <StyledButton cyan onClick={onPublish}>
-        포스트 등록
+        {/* isEdit : originalPostId 값의 존재 유무에 따라 버튼 이름을 포스트 수정 또는 포스트 등록으로 설정 */}
+        포스트 {isEdit ? '수정' : '등록'}
       </StyledButton>
       <StyledButton onClick={onCancel}>취소</StyledButton>
     </WriteActionButtonsBlock>
