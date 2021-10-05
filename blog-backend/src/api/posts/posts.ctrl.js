@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import Joi from 'joi';
 import sanitizeHtml from 'sanitize-html';
 
+const { ObjectId } = mongoose.Types;
+
 /* ------------------------------ sanitize html ----------------------------- */
 const sanitizeOption = {
   allowedTags: [
@@ -29,8 +31,6 @@ const sanitizeOption = {
 };
 
 /* ---------------------------------- 미들웨어 ---------------------------------- */
-const { ObjectId } = mongoose.Types;
-
 /* 요청 검증, id로 post 찾기 미들웨어 ------------------------ */
 export const getPostById = async (ctx, next) => {
   const { id } = ctx.params;
@@ -117,7 +117,7 @@ export const write = async (ctx) => {
 // html을 없애고, 200자 제한하는 함수
 const removeHtmlAndShorten = (body) => {
   const filtered = sanitizeHtml(body, { allowedTags: [] });
-  return filtered.length < 200 ? filtered : `${filtered.slice(0, 200)}`;
+  return filtered.length < 200 ? filtered : `${filtered.slice(0, 200)}...`;
 };
 // GET /api/posts
 export const list = async (ctx) => {
@@ -177,7 +177,7 @@ export const list = async (ctx) => {
 /* -------------------------------- 특정 포스트 조회 ------------------------------- */
 // GET /api/posts/:id
 export const read = async (ctx) => {
-  ctx.body = ctx.state.body;
+  ctx.body = ctx.state.post;
 };
 
 /* -------------------------------- 특정 포스트 제거 ------------------------------- */
@@ -249,7 +249,7 @@ export const update = async (ctx) => {
   const nextData = { ...ctx.request.body };
   // body 값이 주어졌으면 HTML 필터링
   if (nextData.body) {
-    nextData.body = sanitizeHtml(nextData.body);
+    nextData.body = sanitizeHtml(nextData.body, sanitizeOption);
   }
 
   try {
