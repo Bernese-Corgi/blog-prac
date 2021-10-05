@@ -3,7 +3,7 @@ import createRequestSaga, {
   createRequestActionTypes,
 } from '../lib/createRequestSaga';
 import * as postsAPI from '../lib/api/posts';
-import { takeLatest } from '@redux-saga/core/effects';
+import { take, takeLatest } from '@redux-saga/core/effects';
 
 /* ---------------------------------- 액션 타입 --------------------------------- */
 // 모든 내용 초기화
@@ -15,6 +15,10 @@ const CHANGE_FIELD = 'write/CHANGE_FIELD';
 // 포스트 작성
 const [WRITE_POST, WRITE_POST_SUCCESS, WRITE_POST_FAILURE] =
   createRequestActionTypes('write/WRITE_POST');
+
+// 수정 버튼 클릭 시 글쓰기 페이지로 이동
+const SET_ORIGINAL_POST = 'write/SET_ORIGINAL_POST';
+
 /* -------------------------------- 액션 생성 함수 -------------------------------- */
 // 모든 내용 초기화
 export const initialize = createAction(INITIALIZE);
@@ -32,9 +36,14 @@ export const writePost = createAction(WRITE_POST, ({ title, body, tags }) => ({
   tags,
 }));
 
-// 사가 생성
+// 수정 버튼 클릭 시 글쓰기 페이지로 이동
+export const setOriginalPost = createAction(SET_ORIGINAL_POST, (post) => post);
+
+/* ---------------------------------- saga ---------------------------------- */
+// 수정 버튼 클릭 시 글쓰기 페이지로 이동
 const writePostSaga = createRequestSaga(WRITE_POST, postsAPI.writePost);
 
+// write saga
 export function* writeSaga() {
   yield takeLatest(WRITE_POST, writePostSaga);
 }
@@ -46,6 +55,7 @@ const initialState = {
   tags: [],
   post: null,
   postError: null,
+  originalPostId: null,
 };
 
 /* ----------------------------------- 리듀서 ---------------------------------- */
@@ -66,6 +76,14 @@ const write = handleActions(
     [WRITE_POST_FAILURE]: (state, { payload: postError }) => ({
       ...state,
       postError,
+    }),
+    // 수정 버튼 클릭 시 글쓰기 페이지로 이동
+    [SET_ORIGINAL_POST]: (state, { payload: post }) => ({
+      ...state,
+      title: post.title,
+      body: post.body,
+      tags: post.tags,
+      originalPostId: post._id,
     }),
   },
   initialState,
