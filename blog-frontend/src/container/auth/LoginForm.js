@@ -60,12 +60,12 @@ const LoginForm = ({ history }) => {
   useEffect(() => {
     if (user) {
       history.push('/');
-    }
-    // 로그인 상태 유지
-    try {
-      localStorage.setItem('user', JSON.stringify(user));
-    } catch (e) {
-      console.log('localStorage is not working');
+      // 로그인 상태 유지
+      try {
+        localStorage.setItem('user', JSON.stringify(user));
+      } catch (e) {
+        console.log('localStorage is not working');
+      }
     }
   }, [user, history]);
 

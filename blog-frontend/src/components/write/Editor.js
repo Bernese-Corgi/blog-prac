@@ -82,7 +82,7 @@ const Editor = ({ title, body, onChangeField }) => {
     if (mounted.current) return;
     // 마운트된 상태이므로 mounted.current를 true로 설정
     mounted.current = true;
-    // quill 에디터의 현재 html을 body 값에 입력한다. (에디터 내부 값의 초기값을 이전의 입력된 내용으로 설정)
+    // quill 에디터의 현재 html에 이전에 입력된 값 body를 입력한다. (에디터 내부 값의 초기값을 이전의 입력된 내용으로 설정)
     quillInstance.current.root.innerHTML = body;
   }, [body]);
   // 위의 방법 말고, 의존성 배열을 비워도 해결된다.
